@@ -18,14 +18,14 @@
 #                                               #
 #################################################
 
-from picamera import PiCamera
-from time import sleep
-from threading import Thread
-from gpiozero import Button
-from signal import pause
-from blinkt import set_pixel, show
-from scrollphathd.fonts import font5x7
-from datetime import datetime
+from picamera import PiCamera               # The Pi Camera
+from time import sleep                      # Timing
+from threading import Thread                # Threading
+from gpiozero import Button                 # GPIO Zero for the Buttons
+from signal import pause                    # Delays
+from blinkt import set_pixel, show          # The Blinkt Hat Control
+from scrollphathd.fonts import font5x7      # The Scroll PHAT HD Control
+from datetime import datetime               # Date Time
 
 import http.client, urllib.request, urllib.parse, urllib.error, base64
 import time
