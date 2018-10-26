@@ -414,6 +414,8 @@ def setScrollPhatHDText( textToShow, xOffset ):
 #                                               #
 #################################################
 #
+# Scroll Text once across the Scroll PHAT HD
+#
 # Note: This is intended to be used in threading, as it blocks the main application
 #
 class scrollTextClass:
@@ -426,7 +428,7 @@ class scrollTextClass:
 
     def run(self, textToScroll):
 
-        self._running = True
+        self._running = True            # Set that we're currently Scrolling Text
         
         length = setScrollPhatHDText(textToScroll, 0)
 
@@ -451,6 +453,8 @@ class scrollTextClass:
 #           Scroll Some Text (Loop)             #
 #                                               #
 #################################################
+#
+# Scroll Text Forever across the Scroll PHAT HD
 #
 # Note: This is intended to be used in threading, as it blocks the main application
 #
@@ -493,6 +497,8 @@ class scrollTextForeverClass:
 #               Show Blinkt Attract             #
 #                                               #
 #################################################
+#
+# Shows a moving sequence of LEDs on the Blinkt
 #
 # Note: This is intended to be used in threading, as it blocks the main application
 #
