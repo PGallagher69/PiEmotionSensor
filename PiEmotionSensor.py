@@ -435,17 +435,17 @@ class scrollTextClass:
         for i in range(length):
 
             if self._running == False:
-                clearScrollPhatHD()
+                clearScrollPhatHD()         # Clear the Display
                 break
             
             try:
-                scrollphathd.scroll(1)
-                scrollphathd.show()
-                sleep(0.1)
+                scrollphathd.scroll(1)      # Scroll the display by 1
+                scrollphathd.show()         # Show the Updated Display
+                sleep(0.1)                  # Wait for 100ms
 
             except KeyboardInterrupt:
-                clearScrollPhatHD()
-                sys.exit(-1)
+                clearScrollPhatHD()         # Clear the Display
+                sys.exit(-1)                # Exit the Routine
                 break
                 
 #################################################
@@ -722,6 +722,9 @@ class convertAndTweetImageClass:
         #
         global rootFilePath
 
+        #
+        # Get the Filename Parts
+        #
         originalFileNameOnly = os.path.splitext(os.path.basename(originalFileName))[0]
         overlayFilename = rootFilePath + originalFileNameOnly + "-" + emotionToTweet + ".png"
         finalFilename = rootFilePath + originalFileNameOnly + "-" + emotionToTweet + "-caption.png"
@@ -916,10 +919,13 @@ def getEmotion():
             sleep(0.5)
 
             #
-            # Show the relevant face depending upon which emotion is ranked highest by the API
+            # Clear the Text we're going to overlay on the Image
             #
             textToAddToImage = ""
 
+            #
+            # Show the relevant face depending upon which emotion is ranked highest by the API
+            #
             if k == "Happy":
                 textToAddToImage = "Had a nice day then?"
                 blinkt.set_all(255, 0, 128, 0.1)
@@ -1027,7 +1033,7 @@ print("Initial Setup Complete")
 #                                               #
 #################################################
 
-BeginAttractMode()                                   # Show the main Attract Text
+BeginAttractMode()                                  # Show the main Attract Text
 
 sleep(1)                                            # Startup Delay
 
@@ -1084,7 +1090,7 @@ while True:
     elif quitButton.is_pressed == True and exitStart != -1 and (time.perf_counter() - exitStart) > 2 and inProgress == False:
 
         scrollTextForever.terminate()   # Stop scrolling any text
-        showBlinktAttract.terminate()       # Stop the Blinkt Attract Mode
+        showBlinktAttract.terminate()   # Stop the Blinkt Attract Mode
         
         ScrollSomeText("QUITTING")      # Say Bye!
         sleep(4)                        # Slight Delay
@@ -1098,4 +1104,4 @@ while True:
     #
     elif quitButton.is_pressed == True and exitStart > -1:
 
-        exitStart = -1                     # Clear the Exit Counter
+        exitStart = -1                   # Clear the Exit Counter
