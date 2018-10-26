@@ -432,6 +432,9 @@ class scrollTextClass:
         
         length = setScrollPhatHDText(textToScroll, 0)
 
+        #
+        # Loop through the length of the message, scrolling it along the display
+        #
         for i in range(length):
 
             if self._running == False:
@@ -474,22 +477,25 @@ class scrollTextForeverClass:
         print(textToScroll)
 
         setScrollPhatHDText(textToScroll, 0)
-            
+        
+        #
+        # Scroll the Message Forever across the display
+        #
         while True:
 
             if self._running == False:
                 print("Exitting Scroll Forever")
-                clearScrollPhatHD()
+                clearScrollPhatHD()                 # Clear the Display
                 break
             
             try:
-                scrollphathd.scroll(1)
-                scrollphathd.show()
-                sleep(0.05)
+                scrollphathd.scroll(1)              # Scroll the Display by 1
+                scrollphathd.show()                 # Show the newly Scrolled DIsplay
+                sleep(0.05)                         # Delay by 500ms
 
             except KeyboardInterrupt:
-                clearScrollPhatHD()
-                sys.exit(-1)
+                clearScrollPhatHD()                 # Clear the Display
+                sys.exit(-1)                        # Exit the Routine
                 break
                 
 #################################################
@@ -610,7 +616,10 @@ def ScrollSomeText( textToScroll ):
 #               Turn the Flash On               #
 #                                               #
 #################################################
-
+#
+# This routine basically turns the Blinkt HAT on white and full brightness
+# to use it as an improvised Flash for Dark Areas.
+#
 def flashOn():
 
     #
@@ -654,7 +663,9 @@ def flashOff():
 #          Display a Countdown Timer            #
 #                                               #
 #################################################
-
+#
+# Countdown to taking the picture... SMILE!
+#
 def showCountdown():
 
     clearScrollPhatHD()
@@ -677,9 +688,15 @@ def showCountdown():
 
 def sendTweet( tweetMessage ):
 
+    #
+    # Setup the Tweepy Authentication
+    #
     auth = OAuthHandler(ckey, csecret)
     auth.set_access_token(atoken, asecret)
     
+    #
+    # Send the Tweet
+    #
     api = tweepy.API(auth)
     api.update_status(tweetMessage)
 
@@ -691,9 +708,15 @@ def sendTweet( tweetMessage ):
 
 def tweetImage(url, message):
     
+    #
+    # Setup the Tweepy Authentication
+    #
     auth = OAuthHandler(ckey, csecret)
     auth.set_access_token(atoken, asecret)
     
+    #
+    # Send the Tweet
+    #
     api = tweepy.API(auth)
     api.update_with_media(url, message)
 
@@ -702,6 +725,8 @@ def tweetImage(url, message):
 #        Convert and Tweet Image Class          #
 #                                               #
 #################################################
+#
+# Convert the Image from the Camera, and Overlay the Text and Emotion Images
 #
 # Note: This is intended to be used in threading, as it blocks the main application
 #
