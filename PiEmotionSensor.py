@@ -36,6 +36,12 @@ import subprocess
 import scrollphathd
 import blinkt
 
+#################################################
+#                                               #
+#         Import Tweepy for Twitter             #
+#                                               #
+#################################################
+
 try:
     import tweepy
     from tweepy import Stream, OAuthHandler
@@ -68,12 +74,11 @@ subscription_key = ''       # Azure Subsrciption Key
 #                                               #
 #################################################
 
-global inProgress
-global camera
-global scrollText
-global displayBrightness
-global rootFilePath
-global displayBrightness
+global inProgress           # Currently Processing an Emotion
+global camera               # The Camera Instance
+global scrollText           # The Text to Scroll on the Screen
+global displayBrightness    # The Display Brightness
+global rootFilePath         # The File Root Path
 
 #################################################
 #                                               #
@@ -961,7 +966,7 @@ def getEmotion():
             # Pause, clean up and revert to the Attract mode
             #
             sleep(5)                    # Wait for 5 seconds just to give the user some time to see the face...
-            BeginAttractMode()           # Revert to Attract Mode
+            BeginAttractMode()          # Revert to Attract Mode
             inProgress = False          # Clear the In Progress flag
             
             return data                 # Return our data
@@ -972,7 +977,7 @@ def getEmotion():
             sleep(0.5)                  # Let the display settle
             showFace(QuestionMark())    # Show a Question Mark
             sleep(5)                    # Wait for 5 seconds...
-            BeginAttractMode()           # Revert to Attract Mode
+            BeginAttractMode()          # Revert to Attract Mode
             inProgress = False          # Clear the In Progress flag
             return                      # Return nothing
 
