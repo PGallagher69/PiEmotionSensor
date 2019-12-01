@@ -24,6 +24,8 @@ python3 -m pip install --upgrade azure-cognitiveservices-vision-face
 
 Install Tweppy using;
 
+```shell
 python3 -m pip install tweepy
+```
 
 NOTE: If you need to run the script at startup, then you'll also need to run the above commands as sudo.
