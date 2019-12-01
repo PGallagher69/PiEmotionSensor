@@ -1,4 +1,4 @@
-# PiEmotionSensor
+# Pi Emotion Sensor
 A Raspberry Pi Emotion Sensor using Cognitive Services, Tweepy, a Scroll pHat HD and a Blinkt
 
 Install the Blinkt library from your home directory using;
