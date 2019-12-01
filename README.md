@@ -12,4 +12,6 @@ If you need to run the script at startup, then you'll also need to run the above
 
 You'll also need to install the Blinkt library from your home directory using;
 
+```shell
 curl https://get.pimoroni.com/blinkt | bash
+```
