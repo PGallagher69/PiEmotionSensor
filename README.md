@@ -13,13 +13,17 @@ Install the Scroll pHat HD library from your home directory using;
 curl https://get.pimoroni.com/scrollphathd | bash
 ```
 
-Note, To use both the Blinkt and the Scroll pHat HD together, then you'll need to stack the two hats, soldering connections between the two.
+Note: To use both the Blinkt and the Scroll pHat HD together, then you'll need to stack the two hats, soldering connections between the two.
 
-You will need to install the Azure Cognitive Services SDK using;
+Install the Azure Cognitive Services SDK using;
 
 ```shell
 python3 -m pip install cognitive-face
 python3 -m pip install --upgrade azure-cognitiveservices-vision-face
 ```
 
-If you need to run the script at startup, then you'll also need to run the above commands as sudo.
+Install Tweppy using;
+
+python3 -m pip install tweepy
+
+NOTE: If you need to run the script at startup, then you'll also need to run the above commands as sudo.
