@@ -22,7 +22,7 @@ python3 -m pip install cognitive-face
 python3 -m pip install --upgrade azure-cognitiveservices-vision-face
 ```
 
-Install Tweppy using;
+Install Tweepy using;
 
 ```shell
 python3 -m pip install tweepy
