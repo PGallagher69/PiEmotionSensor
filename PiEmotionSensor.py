@@ -6,8 +6,8 @@
 # Title:        PiEmotionSensor                 #
 # FileName:     PiEmotionSensor.py              #
 # Author:       Pete Gallagher                  #
-# Date:         07/03/2017                      #
-# Version:      1.0                             #
+# Date:         01/12/2019                      #
+# Version:      2.0                             #
 #                                               #
 #################################################
 #
@@ -18,16 +18,18 @@
 #                                               #
 #################################################
 
-from picamera import PiCamera               # The Pi Camera
-from time import sleep                      # Timing
-from threading import Thread                # Threading
-from gpiozero import Button                 # GPIO Zero for the Buttons
-from signal import pause                    # Delays
-from blinkt import set_pixel, show          # The Blinkt Hat Control
-from scrollphathd.fonts import font5x7      # The Scroll PHAT HD Control
-from datetime import datetime               # Date Time
+from picamera import PiCamera
+from time import sleep
+from threading import Thread
+from gpiozero import Button
+from signal import pause
+from blinkt import set_pixel, show
+from scrollphathd.fonts import font5x7
+from datetime import datetime
 
-import http.client, urllib.request, urllib.parse, urllib.error, base64
+from azure.cognitiveservices.vision.face import FaceClient
+from msrest.authentication import CognitiveServicesCredentials
+
 import time
 import json
 import sys
@@ -35,12 +37,6 @@ import os
 import subprocess
 import scrollphathd
 import blinkt
-
-#################################################
-#                                               #
-#         Import Tweepy for Twitter             #
-#                                               #
-#################################################
 
 try:
     import tweepy
@@ -55,18 +51,10 @@ except ImportError:
 #                                               #
 #################################################
 
-ckey = ''           # Consumer key
-csecret = ''        # Consumer secret
-atoken = ''         # Access token
-asecret = ''        # Access secret
-
-#################################################
-#                                               #
-#           Azure Authentication                #
-#                                               #
-#################################################
-
-subscription_key = ''       # Azure Subsrciption Key 
+ckey = ''     # Consumer key
+csecret = ''  # Consumer secret
+atoken = ''   # Access token
+asecret = ''  # Access secret
 
 #################################################
 #                                               #
@@ -74,11 +62,34 @@ subscription_key = ''       # Azure Subsrciption Key
 #                                               #
 #################################################
 
-global inProgress           # Currently Processing an Emotion
-global camera               # The Camera Instance
-global scrollText           # The Text to Scroll on the Screen
-global displayBrightness    # The Display Brightness
-global rootFilePath         # The File Root Path
+global inProgress
+global camera
+global scrollText
+global displayBrightness
+global rootFilePath
+global displayBrightness
+
+global KEY
+global ENDPOINT
+
+FPS = 30
+
+#################################################
+#                                               #
+#              Azure Authentication             #
+#                                               #
+#################################################
+
+# Set the FACE_SUBSCRIPTION_KEY environment variable with your key as the value.
+# This key will serve all examples in this document.
+KEY = ''
+
+# Set the FACE_ENDPOINT environment variable with the endpoint from your Face service in Azure.
+# This endpoint will be used in all examples in this quickstart.
+ENDPOINT = ''
+
+# Create an authenticated FaceClient.
+face_client = FaceClient(ENDPOINT, CognitiveServicesCredentials(KEY))
 
 #################################################
 #                                               #
@@ -340,6 +351,16 @@ def QuestionMark():
 
 #################################################
 #                                               #
+#               Dump an Object                  #
+#                                               #
+#################################################
+
+def dump(obj):
+  for attr in dir(obj):
+    print("obj.%s = %r" % (attr, getattr(obj, attr)))
+
+#################################################
+#                                               #
 #               Clear the Display               #
 #                                               #
 #################################################
@@ -349,8 +370,7 @@ def clearScrollPhatHD():
     scrollphathd.scroll_to(0,0)
     scrollphathd.clear()
     scrollphathd.show()
-
-
+    
 #################################################
 #                                               #
 #               Clear the Blinkt                #
@@ -414,8 +434,6 @@ def setScrollPhatHDText( textToShow, xOffset ):
 #                                               #
 #################################################
 #
-# Scroll Text once across the Scroll PHAT HD
-#
 # Note: This is intended to be used in threading, as it blocks the main application
 #
 class scrollTextClass:
@@ -428,27 +446,24 @@ class scrollTextClass:
 
     def run(self, textToScroll):
 
-        self._running = True            # Set that we're currently Scrolling Text
+        self._running = True
         
         length = setScrollPhatHDText(textToScroll, 0)
 
-        #
-        # Loop through the length of the message, scrolling it along the display
-        #
         for i in range(length):
 
             if self._running == False:
-                clearScrollPhatHD()         # Clear the Display
+                clearScrollPhatHD()
                 break
             
             try:
-                scrollphathd.scroll(1)      # Scroll the display by 1
-                scrollphathd.show()         # Show the Updated Display
-                sleep(0.1)                  # Wait for 100ms
+                scrollphathd.scroll(1)
+                scrollphathd.show()
+                sleep(0.1)
 
             except KeyboardInterrupt:
-                clearScrollPhatHD()         # Clear the Display
-                sys.exit(-1)                # Exit the Routine
+                clearScrollPhatHD()
+                sys.exit(-1)
                 break
                 
 #################################################
@@ -456,8 +471,6 @@ class scrollTextClass:
 #           Scroll Some Text (Loop)             #
 #                                               #
 #################################################
-#
-# Scroll Text Forever across the Scroll PHAT HD
 #
 # Note: This is intended to be used in threading, as it blocks the main application
 #
@@ -477,25 +490,22 @@ class scrollTextForeverClass:
         print(textToScroll)
 
         setScrollPhatHDText(textToScroll, 0)
-        
-        #
-        # Scroll the Message Forever across the display
-        #
+            
         while True:
 
             if self._running == False:
                 print("Exitting Scroll Forever")
-                clearScrollPhatHD()                 # Clear the Display
+                clearScrollPhatHD()
                 break
             
             try:
-                scrollphathd.scroll(1)              # Scroll the Display by 1
-                scrollphathd.show()                 # Show the newly Scrolled DIsplay
-                sleep(0.05)                         # Delay by 500ms
+                scrollphathd.scroll(1)
+                scrollphathd.show()
+                sleep(0.05)
 
             except KeyboardInterrupt:
-                clearScrollPhatHD()                 # Clear the Display
-                sys.exit(-1)                        # Exit the Routine
+                clearScrollPhatHD()
+                sys.exit(-1)
                 break
                 
 #################################################
@@ -503,8 +513,6 @@ class scrollTextForeverClass:
 #               Show Blinkt Attract             #
 #                                               #
 #################################################
-#
-# Shows a moving sequence of LEDs on the Blinkt
 #
 # Note: This is intended to be used in threading, as it blocks the main application
 #
@@ -523,8 +531,7 @@ class showBlinkAttractClass:
         print("Showing Blinkt Attract")
         
         blinkt.clear()
-        blinkt.show()
-
+        
         while True:
 
             try:
@@ -536,8 +543,7 @@ class showBlinkAttractClass:
                         return
 
                     set_pixel(j, 255, 0, 0, 0.1)
-                    blinkt.show()
-                    time.sleep(0.05)
+                    time.sleep(0.25)
 
                 for j in range(0, 7, 1):
 
@@ -547,8 +553,7 @@ class showBlinkAttractClass:
                         return
 
                     set_pixel(j, 0, 0, 0, 0.1)
-                    blinkt.show()
-                    time.sleep(0.05)
+                    time.sleep(0.25)
 
                 for j in range(7, -1, -1):
 
@@ -558,8 +563,7 @@ class showBlinkAttractClass:
                         return
 
                     set_pixel(j, 255, 0, 0, 0.1)
-                    blinkt.show()
-                    time.sleep(0.05)
+                    time.sleep(0.25)
 
                 for j in range(7, 0, -1):
 
@@ -569,8 +573,7 @@ class showBlinkAttractClass:
                         return
 
                     set_pixel(j, 0, 0, 0, 0.1)
-                    blinkt.show()
-                    time.sleep(0.05)
+                    time.sleep(0.25)
 
             except KeyboardInterrupt:
                 clearBlinkt()
@@ -616,10 +619,7 @@ def ScrollSomeText( textToScroll ):
 #               Turn the Flash On               #
 #                                               #
 #################################################
-#
-# This routine basically turns the Blinkt HAT on white and full brightness
-# to use it as an improvised Flash for Dark Areas.
-#
+
 def flashOn():
 
     #
@@ -663,9 +663,7 @@ def flashOff():
 #          Display a Countdown Timer            #
 #                                               #
 #################################################
-#
-# Countdown to taking the picture... SMILE!
-#
+
 def showCountdown():
 
     clearScrollPhatHD()
@@ -688,15 +686,9 @@ def showCountdown():
 
 def sendTweet( tweetMessage ):
 
-    #
-    # Setup the Tweepy Authentication
-    #
     auth = OAuthHandler(ckey, csecret)
     auth.set_access_token(atoken, asecret)
     
-    #
-    # Send the Tweet
-    #
     api = tweepy.API(auth)
     api.update_status(tweetMessage)
 
@@ -708,15 +700,9 @@ def sendTweet( tweetMessage ):
 
 def tweetImage(url, message):
     
-    #
-    # Setup the Tweepy Authentication
-    #
     auth = OAuthHandler(ckey, csecret)
     auth.set_access_token(atoken, asecret)
     
-    #
-    # Send the Tweet
-    #
     api = tweepy.API(auth)
     api.update_with_media(url, message)
 
@@ -725,8 +711,6 @@ def tweetImage(url, message):
 #        Convert and Tweet Image Class          #
 #                                               #
 #################################################
-#
-# Convert the Image from the Camera, and Overlay the Text and Emotion Images
 #
 # Note: This is intended to be used in threading, as it blocks the main application
 #
@@ -747,9 +731,6 @@ class convertAndTweetImageClass:
         #
         global rootFilePath
 
-        #
-        # Get the Filename Parts
-        #
         originalFileNameOnly = os.path.splitext(os.path.basename(originalFileName))[0]
         overlayFilename = rootFilePath + originalFileNameOnly + "-" + emotionToTweet + ".png"
         finalFilename = rootFilePath + originalFileNameOnly + "-" + emotionToTweet + "-caption.png"
@@ -843,38 +824,7 @@ def getEmotion():
     # While we're waiting for the Emotion to be Analysed... Scroll some text (This is done in a multi-threaded way)
     #
     ScrollSomeText("Analysing Emotion")
-    
-    #
-    # Prepare the API Call Headers
-    #
-    headers = {
-       # Basic Authorization Sample
-       # 'Authorization': 'Basic %s' % base64.encodestring('{username}:{password}'),
-       'Content-type': 'application/octet-stream',
-    }
- 
-    #
-    # Prepare the API Call Paramaters
-    #
-    params = urllib.parse.urlencode({
-       # Specify your subscription key
-       'subscription-key': subscription_key,
-       # Specify values for optional parameters, as needed
-       #'analyzesFaceLandmarks': 'false',
-       #'analyzesAge': 'yes',
-       #'analyzesGender': 'false',
-       #'analyzesHeadPose': 'false',
-    })
-    
-    #
-    # Get the recently taken file and append it to the API call body
-    #
-    body = ""
-    
-    f = open(photoFilename, "rb")
-    body = f.read()
-    f.close()
-    
+
     #
     # Begin our API Call
     #
@@ -883,49 +833,40 @@ def getEmotion():
         #
         # Setup and perform the Request URL adding the Paramaters, the File (in the Body) and the headers 
         #
-        conn = http.client.HTTPSConnection('westus.api.cognitive.microsoft.com')
-        conn.request("POST", "/emotion/v1.0/recognize?%s" % params, body, headers)
-        response = conn.getresponse()
-        
-        #
-        # Get the response from the API Call
-        #
-        data = response.read()
-        
-        #
-        # Close the connection and decode the JSON data
-        #
-        conn.close()
-        data = json.loads(data.decode("utf-8"))
+        attributes = list(['emotion', 'age'])
+
+        detected_faces = face_client.face.detect_with_stream(open(photoFilename, 'rb'), return_face_attributes=attributes)
         
         print("Checking if we have a person")
 
         #
         # Check if the API Found any faces...
         #
-        if 0 < len(data) :
+        if detected_faces:
 
             #
             # We're only interested in one person at the moment, so get the first person found...
             #
-            firstPerson = data[0]
+            firstPerson = detected_faces[0]
+
+            dump(firstPerson.face_attributes.emotion)
             
             #
             # Get the Emotion Scores
             #
-            firstPersonScores = firstPerson["scores"]
+            firstPersonScores = firstPerson.face_attributes.emotion
             
             #
             # Create a custom JSON object to hold the data in a more friendly way
             #
-            emotions = {'Happy': firstPersonScores["happiness"] * 100,
-                        'Sad' : firstPersonScores["sadness"] * 100,
-                        'Surprised' : firstPersonScores["surprise"] * 100,
-                        'Neutral' : firstPersonScores["neutral"] * 100,
-                        'Angry' : firstPersonScores["anger"] * 100,
-                        'Contemptful' : firstPersonScores["contempt"] * 100,
-                        'Disgusted' : firstPersonScores["disgust"] * 100,
-                        'Fearful' : firstPersonScores["fear"] * 100} 
+            emotions = {'Happy': firstPersonScores.happiness * 100,
+                        'Sad' : firstPersonScores.sadness * 100,
+                        'Surprised' : firstPersonScores.surprise * 100,
+                        'Neutral' : firstPersonScores.neutral * 100,
+                        'Angry' : firstPersonScores.anger * 100,
+                        'Contemptful' : firstPersonScores.contempt * 100,
+                        'Disgusted' : firstPersonScores.disgust * 100,
+                        'Fearful' : firstPersonScores.fear * 100} 
 
             #
             # Sort the emotions found by the value in a decending order, so the highest result is the first item in the list
@@ -944,13 +885,10 @@ def getEmotion():
             sleep(0.5)
 
             #
-            # Clear the Text we're going to overlay on the Image
+            # Show the relevant face depending upon which emotion is ranked highest by the API
             #
             textToAddToImage = ""
 
-            #
-            # Show the relevant face depending upon which emotion is ranked highest by the API
-            #
             if k == "Happy":
                 textToAddToImage = "Had a nice day then?"
                 blinkt.set_all(255, 0, 128, 0.1)
@@ -1006,7 +944,7 @@ def getEmotion():
             BeginAttractMode()          # Revert to Attract Mode
             inProgress = False          # Clear the In Progress flag
             
-            return data                 # Return our data
+            return firstPerson          # Return our data
 
         else:
 
@@ -1014,7 +952,7 @@ def getEmotion():
             sleep(0.5)                  # Let the display settle
             showFace(QuestionMark())    # Show a Question Mark
             sleep(5)                    # Wait for 5 seconds...
-            BeginAttractMode()          # Revert to Attract Mode
+            BeginAttractMode()           # Revert to Attract Mode
             inProgress = False          # Clear the In Progress flag
             return                      # Return nothing
 
@@ -1071,7 +1009,13 @@ exitStart = -1                                      # Used to time exitting the 
 #################################################
 
 while True:
-    
+
+    #
+    # Update the Blinkt Hat
+    #    
+    blinkt.show()
+    time.sleep(1/FPS)
+
     #
     # If the Start Button is pressed...
     #
@@ -1099,7 +1043,7 @@ while True:
         if (time.perf_counter() - exitStart) > 5:
 
             scrollTextForever.terminate()   # Stop scrolling any text
-            showBlinktAttract.terminate()       # Stop the Blinkt Attract Mode
+            showBlinktAttract.terminate()   # Stop the Blinkt Attract Mode
         
             ScrollSomeText("SHUTTING DOWN") # Say Bye!
             sleep(4)                        # Slight Delay
@@ -1121,7 +1065,6 @@ while True:
         sleep(4)                        # Slight Delay
         clearScrollPhatHD()             # Clear the Display
         print("Exitting")
-        GPIO.cleanup()                  # Cleanup the GPIO
         sys.exit()                      # Exit the Applicaiton
 
     #
@@ -1129,4 +1072,4 @@ while True:
     #
     elif quitButton.is_pressed == True and exitStart > -1:
 
-        exitStart = -1                   # Clear the Exit Counter
+        exitStart = -1                     # Clear the Exit Counter
