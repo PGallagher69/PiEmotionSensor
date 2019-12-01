@@ -14,10 +14,10 @@ https://developer.twitter.com
 
 Create a New Twitter app and grab;
 
-Consumer API Key - ckey
-Consumer API Secret - csecret
-Access Token - atoken
-Access Token Secret - asecret
+- Consumer API Key (ckey)
+- Consumer API Secret (csecret)
+- Access Token (atoken)
+- Access Token Secret (asecret)
 
 Fill in the fields in the PiEmotionSensor.py file.
 
@@ -29,8 +29,8 @@ https://portal.azure.com
 
 Grab;
 
-Key1 - KEY
-Endpoint - ENDPOINT
+- Key1 (KEY)
+- Endpoint (ENDPOINT)
 
 Fill in the fields in the PiEmotionSensor.py file
 
