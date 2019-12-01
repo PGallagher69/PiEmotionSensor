@@ -6,6 +6,12 @@ A Raspberry Pi Emotion Sensor using Azure Cognitive Services, Tweepy, a Scroll p
 
 ## Installation Instructions:
 
+### Hardware:
+
+You'll need a Raspberry Pi Camera installed.
+
+You'll also need two buttons connected to GPIO 17 (Start) and GPIO 25 (Quit).
+
 ### Twitter:
 
 Apply for a Twitter Developer Account at;
