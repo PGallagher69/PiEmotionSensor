@@ -2,7 +2,7 @@
 
 ## What it's about:
 
-A Raspberry Pi Emotion Sensor using Cognitive Services, Tweepy, a Scroll pHat HD and a Blinkt.
+A Raspberry Pi Emotion Sensor using Azure Cognitive Services, Tweepy, a Scroll pHat HD and a Blinkt.
 
 ## Installation Instructions:
 
