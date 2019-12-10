@@ -12,6 +12,11 @@ You'll need a Raspberry Pi Camera installed.
 
 You'll also need two buttons connected to GPIO 17 (Start) and GPIO 25 (Quit).
 
+## ImageMagick
+
+suda apt-get update
+sudo apt-get install imagemagick
+
 ### Twitter:
 
 Apply for a Twitter Developer Account at;
